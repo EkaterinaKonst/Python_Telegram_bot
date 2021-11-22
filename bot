@@ -1,47 +1,30 @@
-from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
-from telegram.ext import Updater, CallbackContext, Filters, MessageHandler
+import telebot
+from telebot import types
+import random
 
+bot = telebot.TeleBot('')
+complist = ['крутая', "умная", "невообразимая", "невероятная", "воодушевляющая"]
 
-button_help = "Помощь"
+@bot.message_handler(commands=['start'])
+def button_message(message):
+    markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
+    item1=types.KeyboardButton("Получить комплимент")
+    markup.row(item1)
+    bot.send_message(message.chat.id, 'Нажми на кнопочьку', reply_markup=markup)
 
-def button_handler (update : Updater, context : CallbackContext):
-    update.message.reply_text(
-        text='Это помощь',
-        reply_markup= ReplyKeyboardRemove(),
-    )
+@bot.message_handler(content_types='text')
+def message_reply(message):
+    if message.text=="Получить комплимент":
+        bot.send_message(message.from_user.id, f"Ты {random.choice(complist)}")
 
-def mess_handler (update : Updater, context : CallbackContext):
-    text = update.message.text
-    if text == button_help:
-        return button_handler(update=update, context=context)
-    reply_markup = ReplyKeyboardMarkup(
-        keyboard= [
-            [KeyboardButton(text=button_help)],
-        ],
-        resize_keyboard=True
-    )
-
-
-    update.message.reply_text(
-        text='Привет, нажми кнопку ниже',
-        reply_markup = reply_markup
-    )
-
-
-def main():
-    print('Начнём :)')
-
-    updater=Updater(
-        token='      ',
-        use_context=True
-    )
-    updater.dispatcher.add_handler(MessageHandler(filters=Filters.all, callback=mess_handler))
-
-    updater.start_polling()
-    updater.idle()
-
+@bot.message_handler(commands=['help'])
+def get_text_message(message):
+    if message.text == "/help":
+        bot.send_message(message.from_user.id, "Напиши /start")
+    else:
+        bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /start.")
 
 if __name__ == '__main__':
-    main()
+    bot.infinity_polling()
 
 
